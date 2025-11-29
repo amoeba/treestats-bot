@@ -5,6 +5,7 @@ use log::info;
 use crate::web::create_router;
 
 mod bot;
+mod db;
 mod discord;
 mod web;
 
@@ -46,9 +47,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let token = std::env::var("DISCORD_OAUTH_TOKEN")
         .map_err(|e| format!("Failed to get DISCORD_OAUTH_TOKEN: {e}"))?;
 
+    // Init db
+    let database = db::Database::init()
+        .await
+        .expect("Failed to initialize database");
+    info!("Database initialized successfully");
+
     info!("Starting bot process (sha={version}) at {port} with WEB_URL={addr}...");
     tokio::spawn(async move {
-        if let Err(e) = bot::start(token, web_url).await {
+        if let Err(e) = bot::start(token, web_url, database).await {
             log::error!("bot::start failed: {e:?}");
         }
     });

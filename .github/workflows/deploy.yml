@@ -166,6 +166,8 @@ jobs:
     name: Deploy Bot Preview
     runs-on: ubuntu-latest
     needs: build-image
+    permissions:
+      pull-requests: write
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
     steps:
       - name: Generate app name

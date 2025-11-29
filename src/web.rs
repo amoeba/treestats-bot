@@ -26,8 +26,11 @@ struct DiscordError {
 async fn log_requests(req: Request<axum::body::Body>, next: Next) -> Response {
     let method = req.method().clone();
     let uri = req.uri().clone();
-    println!(">>> HTTP {method} {uri}");
-    next.run(req).await
+    let res = next.run(req).await;
+    let status = res.status();
+    println!(">>> {method} {uri} {status}");
+
+    res
 }
 
 async fn discord_pull(

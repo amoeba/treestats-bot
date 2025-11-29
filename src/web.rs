@@ -100,7 +100,7 @@ pub fn create_router() -> Router {
     // CORS
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::list([HeaderValue::from_static(
-            "https://pcap.treestats.net",
+            "https://bot.treestats.net",
         )]))
         .allow_methods([Method::GET, Method::OPTIONS])
         .allow_headers(Any)

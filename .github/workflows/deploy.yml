@@ -163,10 +163,10 @@ jobs:
             git:from-image $APP_NAME"$IMAGE"
 
   deploy-preview:
-    name: Deploy Bot to Production
+    name: Deploy Bot Preview
     runs-on: ubuntu-latest
     needs: build-image
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     steps:
       - name: Generate app name
         id: app-name

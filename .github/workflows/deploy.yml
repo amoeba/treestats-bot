@@ -150,8 +150,7 @@ jobs:
       - name: Deploy bot to Dokku
         run: |
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.image-tag.outputs.tag }}"
-          echo "Deploying $IMAGE to $${{secrets.APP_NAME}}"
+          echo "Deploying $IMAGE to ${{ secrets.APP_NAME }}"
 
-          # Deploy the image
           ssh -i ~/.ssh/deploy_key dokku@${{ secrets.DOKKU_HOST }} \
-            git:from-image $${{secrets.APP_NAME}} "$IMAGE"
+            git:from-image ${{ secrets.APP_NAME }} "$IMAGE"

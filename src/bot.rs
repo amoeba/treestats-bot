@@ -38,14 +38,8 @@ impl EventHandler for Handler {
                 attachment.filename, msg.channel_id, msg.id
             );
 
-            // Create web UI link with query parameters
             let web_link = format!("{}?channel={}&msg={}", self.web_url, msg.channel_id, msg.id);
-
-            // Reply with the link
-            let reply = format!(
-                "You can view your PCAP here: `{}`\n\n[View in PCAP Parser]({})",
-                attachment.filename, web_link
-            );
+            let reply = format!("You can view your PCAP [here]({})", web_link);
 
             if let Err(e) = msg.reply(&ctx.http, reply).await {
                 error!("Failed to send reply: {}", e);

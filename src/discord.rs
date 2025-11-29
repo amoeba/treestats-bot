@@ -1,8 +1,10 @@
-//! Discord API integration for fetching message attachments
-
 use axum::http::StatusCode;
 use serde::Deserialize;
 use tracing::{debug, error, warn};
+
+const DISCORD_API_BASE: &str = "https://discord.com/api/v9";
+const MAX_ATTACHMENT_SIZE: usize = 10 * 1024 * 1024; // MB
+const TOKEN_PREFIX: &str = "Bot "; // Bot token prefix (required by Discord API)
 
 #[derive(Debug, Deserialize)]
 pub struct DiscordMessage {
@@ -24,27 +26,21 @@ pub struct DiscordAttachment {
     pub size: Option<u32>,
 }
 
-const DISCORD_API_BASE: &str = "https://discord.com/api/v9";
-const MAX_ATTACHMENT_SIZE: usize = 100 * 1024 * 1024; // 100 MB
-const TOKEN_PREFIX: &str = "Bot "; // Bot token prefix (required by Discord API)
-
 /// Validate a Discord snowflake ID (17-19 digits, numeric only)
 pub fn is_valid_snowflake(id: &str) -> bool {
     !id.is_empty() && id.len() >= 17 && id.len() <= 19 && id.chars().all(|c| c.is_ascii_digit())
 }
 
-/// Validate that filename has .pcap or .pcapng extension
 fn is_pcap_file(filename: &str) -> bool {
-    filename.ends_with(".pcap") || filename.ends_with(".pcapng")
+    filename.ends_with(".pcap")
 }
 
-/// Fetch message details from Discord API
+// Fetch message from Discord API
 pub async fn fetch_message(
     channel_id: &str,
     message_id: &str,
     token: &str,
 ) -> Result<DiscordMessage, (StatusCode, String)> {
-    // Validate snowflake IDs
     if !is_valid_snowflake(channel_id) {
         return Err((
             StatusCode::BAD_REQUEST,

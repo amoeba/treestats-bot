@@ -3,8 +3,11 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use tracing::{debug, error, info};
 
+use crate::db::{CommandLog, Database};
+
 pub struct Handler {
     pub web_url: String,
+    pub db: Database,
 }
 
 #[async_trait]
@@ -41,21 +44,48 @@ impl EventHandler for Handler {
             let web_link = format!("{}?channel={}&msg={}", self.web_url, msg.channel_id, msg.id);
             let reply = format!("You can view your PCAP [here]({web_link})");
 
-            if let Err(e) = msg.reply(&ctx.http, reply).await {
+            let success = if let Err(e) = msg.reply(&ctx.http, reply).await {
                 error!("Failed to send reply: {}", e);
+                false
+            } else {
+                true
+            };
+
+            // Log command to database
+            let log = CommandLog {
+                command_name: "pcap_detect".to_string(),
+                user_id: msg.author.id.to_string(),
+                user_name: msg.author.name.clone(),
+                channel_id: msg.channel_id.to_string(),
+                guild_id: msg.guild_id.map(|id| id.to_string()),
+                message_id: msg.id.to_string(),
+                success,
+                error_message: if success {
+                    None
+                } else {
+                    Some("Failed to send reply".to_string())
+                },
+            };
+
+            if let Err(e) = self.db.log_command(log).await {
+                error!("Failed to log command to database: {}", e);
             }
         }
     }
 }
 
 /// Start the Discord bot
-pub async fn start(token: String, web_url: String) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start(
+    token: String,
+    web_url: String,
+    db: Database,
+) -> Result<(), Box<dyn std::error::Error>> {
     info!("Starting bot with WEB_URL={}", web_url);
 
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
-    let handler = Handler { web_url };
+    let handler = Handler { web_url, db };
     let mut client = Client::builder(&token, intents)
         .event_handler(handler)
         .await?;

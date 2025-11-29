@@ -5,10 +5,10 @@ use axum::{
     response::Response,
     routing::get,
 };
-use http::StatusCode;
+use http::{HeaderValue, Method, StatusCode};
 use log::info;
 use serde::{Deserialize, Serialize};
-use tower_http::{services::ServeDir, trace::TraceLayer};
+use tower_http::{cors::AllowOrigin, services::ServeDir, trace::TraceLayer};
 
 use crate::discord::{download_attachment, fetch_message};
 
@@ -92,6 +92,16 @@ async fn health() -> &'static str {
 
 pub fn create_router() -> Router {
     let dist_path = std::path::PathBuf::from("dist");
+    use tower_http::cors::{Any, CorsLayer};
+
+    // CORS
+    let cors = CorsLayer::new()
+        .allow_origin(AllowOrigin::list([HeaderValue::from_static(
+            "https://pcap.treestats.net",
+        )]))
+        .allow_methods([Method::GET, Method::OPTIONS])
+        .allow_headers(Any)
+        .expose_headers(Any);
 
     Router::new()
         .route("/api/health", get(health))
@@ -100,6 +110,7 @@ pub fn create_router() -> Router {
             get(discord_pull),
         )
         .fallback_service(ServeDir::new(&dist_path))
-        .layer(middleware::from_fn(log_requests))
+        .layer(cors)
         .layer(TraceLayer::new_for_http())
+        .layer(middleware::from_fn(log_requests))
 }

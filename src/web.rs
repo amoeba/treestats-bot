@@ -5,10 +5,10 @@ use axum::{
     response::Response,
     routing::get,
 };
-use http::{HeaderValue, Method, StatusCode};
+use http::{Method, StatusCode};
 use log::info;
 use serde::{Deserialize, Serialize};
-use tower_http::{cors::AllowOrigin, services::ServeDir, trace::TraceLayer};
+use tower_http::{services::ServeDir, trace::TraceLayer};
 
 use crate::discord::{download_attachment, fetch_message};
 

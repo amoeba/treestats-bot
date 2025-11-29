@@ -39,7 +39,7 @@ impl EventHandler for Handler {
             );
 
             let web_link = format!("{}?channel={}&msg={}", self.web_url, msg.channel_id, msg.id);
-            let reply = format!("You can view your PCAP [here]({})", web_link);
+            let reply = format!("You can view your PCAP [here]({web_link})");
 
             if let Err(e) = msg.reply(&ctx.http, reply).await {
                 error!("Failed to send reply: {}", e);

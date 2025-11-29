@@ -41,18 +41,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let version = std::env::var("GIT_SHA_SHORT").unwrap_or_else(|_| "unknown".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
     let addr = format!("0.0.0.0:{port}");
-    let web_url = std::env::var("WEB_URL")
-        .unwrap_or_else(|_| format!("http://localhost:{}", port).to_string());
+    let web_url =
+        std::env::var("WEB_URL").unwrap_or_else(|_| format!("http://localhost:{port}").to_string());
     let token = std::env::var("DISCORD_OAUTH_TOKEN")
-        .map_err(|e| format!("Failed to get DISCORD_OAUTH_TOKEN: {}", e))?;
+        .map_err(|e| format!("Failed to get DISCORD_OAUTH_TOKEN: {e}"))?;
 
-    info!(
-        "Starting bot process (sha={}) at {} with WEB_URL={}...",
-        version, port, addr
-    );
+    info!("Starting bot process (sha={version}) at {port} with WEB_URL={addr}...");
     tokio::spawn(async move {
         if let Err(e) = bot::start(token, web_url).await {
-            log::error!("bot::start failed: {:?}", e);
+            log::error!("bot::start failed: {e:?}");
         }
     });
 
@@ -61,7 +58,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .expect("Failed to bind listener");
 
-    info!("Web server running on {}", addr);
+    info!("Web server running on {addr}");
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

@@ -44,8 +44,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let addr = format!("0.0.0.0:{port}");
     let web_url =
         std::env::var("WEB_URL").unwrap_or_else(|_| format!("http://localhost:{port}").to_string());
-    let token = std::env::var("DISCORD_OAUTH_TOKEN")
-        .map_err(|e| format!("Failed to get DISCORD_OAUTH_TOKEN: {e}"))?;
+    let token = std::env::var("DISCORD_BOT_TOKEN")
+        .map_err(|e| format!("Failed to get DISCORD_BOT_TOKEN: {e}"))?;
 
     // Init db
     let database = db::Database::init()

@@ -156,6 +156,7 @@ jobs:
 
       - name: Deploy bot to Dokku
         run: |
+          APP_NAME="${{ steps.app-name.outputs.app_name }}"
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.image-tag.outputs.tag }}"
           echo "Deploying $IMAGE to $APP_NAME"
 

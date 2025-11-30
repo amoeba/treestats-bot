@@ -1,4 +1,8 @@
 use serenity::async_trait;
+use serenity::builder::{
+    CreateCommand, CreateInteractionResponse, CreateInteractionResponseMessage,
+};
+use serenity::model::application::Interaction;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use tracing::{debug, error, info};
@@ -12,8 +16,37 @@ pub struct Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         info!("Bot connected as: {}", ready.user.name);
+
+        let http = &ctx.http;
+
+        let status_command = CreateCommand::new("status").description("Check bot status");
+
+        if let Err(e) = http.create_global_command(&status_command).await {
+            error!("Failed to create status command: {}", e);
+        }
+    }
+
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::Command(command) = interaction {
+            info!(
+                "Received command {} from user {}",
+                command.data.name, command.user.id
+            );
+
+            let content = match command.data.name.as_str() {
+                "status" => "Okay".to_string(),
+                _ => "Unknown command".to_string(),
+            };
+
+            let data = CreateInteractionResponseMessage::new().content(content);
+            let builder = CreateInteractionResponse::Message(data);
+
+            if let Err(e) = command.create_response(&ctx.http, builder).await {
+                error!("Failed to respond to command: {}", e);
+            }
+        }
     }
 
     async fn message(&self, ctx: Context, msg: Message) {

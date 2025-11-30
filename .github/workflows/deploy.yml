@@ -160,7 +160,7 @@ jobs:
           echo "Deploying $IMAGE to $APP_NAME"
 
           ssh -i ~/.ssh/deploy_key dokku@${{ secrets.DOKKU_HOST }} \
-            git:from-image $APP_NAME"$IMAGE"
+            git:from-image $APP_NAME "$IMAGE"
 
   deploy-preview:
     name: Deploy Bot Preview

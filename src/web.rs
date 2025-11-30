@@ -46,7 +46,7 @@ async fn discord_pull(
     );
 
     // Check if token is available
-    let token = std::env::var("DISCORD_OAUTH_TOKEN").map_err(|_| {
+    let token = std::env::var("DISCORD_BOT_TOKEN").map_err(|_| {
         (
             StatusCode::UNAUTHORIZED,
             Json(DiscordError {

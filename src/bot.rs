@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use serenity::async_trait;
 use serenity::builder::{
     CreateCommand, CreateCommandOption, CreateInteractionResponse, CreateInteractionResponseMessage,
@@ -5,7 +6,6 @@ use serenity::builder::{
 use serenity::model::application::{CommandOptionType, Interaction};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serde::Deserialize;
 use tracing::{debug, error, info};
 
 use crate::db::{CommandLog, Database};
@@ -129,9 +129,7 @@ impl EventHandler for Handler {
                             if let Some(server) = find_server(&servers, server_name) {
                                 let mut response = format!(
                                     "You can connect to {} at `{}:{}`.",
-                                    server.name,
-                                    server.host,
-                                    server.port
+                                    server.name, server.host, server.port
                                 );
 
                                 match (&server.discord_url, &server.players) {
@@ -173,7 +171,10 @@ impl EventHandler for Handler {
 
                                 response
                             } else {
-                                format!("Server '{}' not found. Please check the name and try again.", server_name)
+                                format!(
+                                    "Server '{}' not found. Please check the name and try again.",
+                                    server_name
+                                )
                             }
                         }
                         Err(e) => {
